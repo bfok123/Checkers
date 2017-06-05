@@ -15,7 +15,7 @@ public class CheckerBoard extends JFrame {
 	private int playerTurn;
 
 	public CheckerBoard() {
-		this.setTitle("Checkers by Brandon Fok");
+		this.setTitle("Checkers");
 		this.setBackground(Color.WHITE);
 		this.setSize(828, 872);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
