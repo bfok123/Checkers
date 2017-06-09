@@ -13,15 +13,12 @@ public class Player {
 		setPiecesRemaining(12);
 	}
 	
-	public void addPiece(Piece piece) {
-		pieces.add(piece);
-	}
-	
-	public Piece removePiece(int index) {
-		if(index + 1 <= pieces.size()) {
-			Piece retPiece = pieces.get(index);
-			pieces.remove(index);
-			return retPiece;
+	public Piece removePieceAt(int row, int col) {
+		for(Piece piece : pieces) {
+			if(piece.getRow() == row && piece.getCol() == col) {
+				pieces.remove(piece);
+				return piece;
+			}
 		}
 		return null;
 	}

@@ -1,12 +1,6 @@
 import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.util.ArrayList;
-
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 public class CheckerBoard extends JFrame {
 	private Square[][] squares;
@@ -15,7 +9,7 @@ public class CheckerBoard extends JFrame {
 	private int playerTurn;
 
 	public CheckerBoard() {
-		this.setTitle("Checkers");
+		this.setTitle("Checkers by Brandon Fok");
 		this.setBackground(Color.WHITE);
 		this.setSize(828, 872);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -81,32 +75,78 @@ public class CheckerBoard extends JFrame {
 		
 		this.setVisible(true);
 	}
-	/*
-	public static void movePiece(int row, int col) {
-		if(playerTurn == 1) {
-			Piece pieceToMove = playerOne.pieceSelected();
-			pieceToMove.deselect();
-			
-		}
-	}
-*/
+
 	// move a piece to specified row and column
 	public void moveToSquare(Piece piece, int newRow, int newCol) {
-		if(validSquare(piece, newRow, newCol)) {
-			squares[piece.getRow()][piece.getCol()].remove(piece); // remove piece from square
-			squares[piece.getRow()][piece.getCol()].repaint();
-			squares[piece.getRow()][piece.getCol()].setOccupied(false);
-			squares[newRow][newCol].add(piece); // add that piece to square that was clicked on
-			squares[newRow][newCol].setOccupied(true);
-		}
+		squares[piece.getRow()][piece.getCol()].remove(piece); // remove piece from square
+		squares[piece.getRow()][piece.getCol()].repaint();
+		squares[piece.getRow()][piece.getCol()].setOccupied(false);
+		squares[newRow][newCol].add(piece); // add that piece to square that was clicked on
+		squares[newRow][newCol].setOccupied(true);
 	}
 	
-	// check to see if the move is valid
-	public boolean validSquare(Piece piece, int newRow, int newCol) {
+	// move a piece to specified row and column and capture enemy that is jumped over
+	public void capture(Piece piece, int newRow, int newCol) {
 		int currRow = piece.getRow();
 		int currCol = piece.getCol();
-		if(newRow == (currRow - 1) || newRow == (currRow + 1)) {
-			if(newCol == (currCol - 1) || newCol == (currCol + 1)) {
+		int enemyRow = (currRow + newRow) / 2;
+		int enemyCol = (currCol + newCol) / 2;
+		Player enemyPlayer = getEnemyPlayer();
+		
+		moveToSquare(piece, newRow, newCol);
+		
+		Piece enemyPiece = enemyPlayer.removePieceAt(enemyRow, enemyCol); // remove enemy piece that is jumped over from player array list thing
+		squares[enemyRow][enemyCol].remove(enemyPiece); // remove enemy piece from square
+		squares[enemyRow][enemyCol].repaint();
+		squares[enemyRow][enemyCol].setOccupied(false);
+		// change player's data
+	}
+	
+	public boolean validCaptureSquare(Piece piece, int newRow, int newCol) {
+		int currRow = piece.getRow();
+		int currCol = piece.getCol();
+		int enemyRow = (currRow + newRow) / 2;
+		int enemyCol = (currCol + newCol) / 2;
+		Square enemySquare = squares[enemyRow][enemyCol];
+		
+		// if square that enemy is in is occupied and it is occupied by the opposite player and the square that the player is jumping to is unoccupied
+		if(enemySquare.getOccupied() == true && enemySquare.getPiece().getPlayer() != piece.getPlayer() && !squares[newRow][newCol].getOccupied()) {
+			if(newCol == (currCol - 2) || newCol == (currCol + 2)) {
+				// if piece is king, it can capture backwards or forwards diagonally
+				if(piece.getIsKing()) {
+					if(newRow == (currRow + 2) || newRow == (currRow - 2)) {
+						return true;
+					}
+				}
+				// if piece is player one's, it can capture downwards diagonally
+				if(piece.getPlayer() == playerOne && newRow == (currRow + 2)) {
+					return true;
+				// if piece is player two's, it can capture upwards diagonally
+				} else if(piece.getPlayer() == playerTwo && newRow == (currRow - 2)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	// check to see if the move is valid (not captures)
+	public boolean validMoveSquare(Piece piece, int newRow, int newCol) {
+		int currRow = piece.getRow();
+		int currCol = piece.getCol();
+		
+		if(newCol == (currCol - 1) || newCol == (currCol + 1)) {
+			// if piece is king, it can move backwards or forwards diagonally
+			if(piece.getIsKing()) {
+				if(newRow == (currRow + 1) || newRow == (currRow - 1)) {
+					return true;
+				}
+			}
+			// if piece is player one's, it can move downwards diagonally
+			if(piece.getPlayer() == playerOne && newRow == (currRow + 1)) {
+				return true;
+			// if piece is player two's, it can move upwards diagonally
+			} else if(piece.getPlayer() == playerTwo && newRow == (currRow - 1)) {
 				return true;
 			}
 		}
@@ -119,6 +159,14 @@ public class CheckerBoard extends JFrame {
 	
 	public int getPlayerTurn() {
 		return playerTurn;
+	}
+	
+	public Player getEnemyPlayer() {
+		if(playerTurn == 1) {
+			return playerTwo;
+		} else {
+			return playerOne;
+		}
 	}
 	
 	// switches playerTurn from 1 to 2 or 2 to 1

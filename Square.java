@@ -2,7 +2,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
 import javax.swing.JPanel;
 
 public class Square extends JPanel implements MouseListener{
@@ -24,6 +23,13 @@ public class Square extends JPanel implements MouseListener{
 		occupied = false;
 		this.checkerBoard = checkerBoard;
 		this.addMouseListener(this);
+	}
+	
+	public Piece getPiece() {
+		if(occupied) {
+			return (Piece)this.getComponent(0);
+		}
+		return null;
 	}
 	
 	public int getRow() {
@@ -62,13 +68,16 @@ public class Square extends JPanel implements MouseListener{
 
 	@Override
 	public void mousePressed(MouseEvent arg0) {
+		Player playerOne = checkerBoard.getPlayerOne();
+		Player playerTwo = checkerBoard.getPlayerTwo();
+		
 		// if there is no piece in this square
 		if(!occupied) {
-			if(checkerBoard.getPlayerTurn() == 1) {
-				Piece piece = checkerBoard.getPlayerOne().pieceSelected();
+			if(checkerBoard.getPlayerTurn() == 1 && playerOne.pieceSelected() != null) {
+				Piece piece = playerOne.pieceSelected();
 				piece.move(this);
-			} else if(checkerBoard.getPlayerTurn() == 2) {
-				Piece piece = checkerBoard.getPlayerTwo().pieceSelected();
+			} else if(checkerBoard.getPlayerTurn() == 2 && playerTwo.pieceSelected() != null) {
+				Piece piece = playerTwo.pieceSelected();
 				piece.move(this);
 			}
 		}
