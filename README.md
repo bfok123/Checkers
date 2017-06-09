@@ -1,1 +1,1 @@
-# Checkers
+# Checkers by Sam Wheelock
