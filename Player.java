@@ -1,63 +1,82 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class Player {
-	private ArrayList<Piece> pieces;
-	private int kills;
-	private int piecesRemaining;
-	private int playerNum;
+	private int playerNum; // 1 is top player, -1 is bottom player
+	private List<Piece> pieces;
 	
 	public Player(int playerNum) {
-		pieces = new ArrayList<Piece>();
-		kills = 0;
 		this.playerNum = playerNum;
-		setPiecesRemaining(12);
+		pieces = new ArrayList<Piece>();
 	}
 	
-	public Piece removePieceAt(int row, int col) {
-		for(Piece piece : pieces) {
-			if(piece.getRow() == row && piece.getCol() == col) {
-				pieces.remove(piece);
-				return piece;
+	// check if this player has no pieces/lost the game
+	public boolean hasNoPieces() {
+		if(pieces.size() == 0) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	// check if this player has no legal moves/jumps to make (results in loss)
+	public boolean hasNoMove() {
+		boolean hasNoMove = true;
+		for(Piece p : pieces) {
+			if(p.getPossibleMoveSquares().size() > 0 || p.getPossibleJumpSquares().size() > 0) {
+				hasNoMove = false;
 			}
 		}
-		return null;
+		
+		return hasNoMove;
 	}
 	
-	public ArrayList<Piece> getPieces() {
-		return pieces;
+	// adds a piece to this player
+	public void addPiece(Piece p) {
+		pieces.add(p);
 	}
 	
-	public void setPieces(ArrayList<Piece> pieces) {
-		this.pieces = pieces;
+	// removes a piece from this player
+	public void removePiece(Piece p) {
+		pieces.remove(p);
 	}
 	
-	public int getPlayer() {
+	// updates pieces for this player that can be selected after each move
+	public void updateSelectablePieces() {
+		boolean hasToJump = false;
+		
+		for(Piece p : pieces) {
+			// make all pieces unselectable
+			p.makeUnselectable();
+			
+			// if there are any possible jump squares for any piece, player has to jump, make those pieces selectable
+			if(p.getPossibleJumpSquares().size() > 0) {
+				hasToJump = true;
+				p.makeSelectable();
+			}
+		}
+		
+		// if player does not have to jump, make all pieces with possible move squares selectable
+		if(!hasToJump) {
+			for(Piece p : pieces) {
+				if(p.getPossibleMoveSquares().size() > 0) {
+					p.makeSelectable();
+				}
+			}
+		}
+	}
+	
+	// returns this player's number (1 for top player, -1 for bottom player)
+	public int getPlayerNum() {
 		return playerNum;
 	}
 	
-	// check which piece is selected, return that piece
-	public Piece pieceSelected() {
-		for(Piece piece : pieces) {
-			if(piece.isSelected()) {
-				return piece;
-			}
+	// returns the piece that is currently selected by this player, otherwise returns null
+	public Piece getSelectedPiece() {
+		for(Piece p : pieces) {
+			if(p.isSelected()) return p;
 		}
+		
 		return null;
-	}
-	
-	public int getKills() {
-		return kills;
-	}
-	
-	public void setKills(int kills) {
-		this.kills = kills;
-	}
-
-	public int getPiecesRemaining() {
-		return piecesRemaining;
-	}
-
-	public void setPiecesRemaining(int piecesRemaining) {
-		this.piecesRemaining = piecesRemaining;
 	}
 }
